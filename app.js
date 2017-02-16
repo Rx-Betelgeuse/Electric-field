@@ -3,6 +3,7 @@ var context = canvas.getContext("2d");
 var iterations;
 var scale = 1;
 var currentPoint;
+var maxPower = 10;
 
 
 
@@ -11,9 +12,38 @@ class Point {
     constructor(x, y, power, color) {
         this.x = x;
         this.y = y;
-        this.color = color;
+        this.colors = color;
         this.power = power;
+        //this._color;
     }
+
+    get color() {
+        //if (!this._color)
+            this._color = this.getColor();
+        return this._color;
+    }
+
+    getColor() {
+        var red = 0;
+        var green = 0;
+        var blue = 0;
+        if (this.power > 0) {
+            red = Math.round(this.power * 155 / maxPower)+100;
+        }
+        else {
+            blue = Math.round(-this.power * 155 / maxPower)+100;
+        }
+        return `rgb(${red}, ${green}, ${blue})`;
+        //return '#' + red.toString(16) + green.toString(16) + blue.toString(16);
+    }
+     
+     /*
+    delete()
+    {
+        setInterval(function(){
+            this.power-=0.05*maxPower;            
+        },100)
+    };*/
 }
 
 var points = [];
@@ -41,7 +71,7 @@ function getRandomColor() {
 function drawAllPoints() {
     context.beginPath();
     context.rect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = "#222";
+    context.fillStyle = "#fff";
     context.fill();
     context.stroke();
     points.forEach(function (item, i, points) {
@@ -88,7 +118,7 @@ function getRadius(a, b) {
 
 function drawLine(currentPoint) {
     context.moveTo(currentPoint.x, currentPoint.y);
-    while (insideScreen(currentPoint) && checkCollision(currentPoint,9) && iterations < 2000) {
+    while (insideScreen(currentPoint) && checkCollision(currentPoint, 9) && iterations < 2000) {
         iterations++;
         var vector = calculateVector(currentPoint);
         var finishPoint = new Point(currentPoint.x + vector.x, currentPoint.y + vector.y, 0, currentPoint.color)
@@ -100,13 +130,13 @@ function drawLine(currentPoint) {
 }
 
 function insideScreen(point) {
-    if (point.x >= -100 && point.y >= -100 && point.y <= canvas.height+100 && point.x <= canvas.width+100)
+    if (point.x >= -100 && point.y >= -100 && point.y <= canvas.height + 100 && point.x <= canvas.width + 100)
         return true;
     else
         return false;
 }
 
-function checkCollision(point,range) {
+function checkCollision(point, range) {
     var nearestPoint = getNearestPoint(point, range);
     if (nearestPoint == null || nearestPoint == currentPoint)
         return true;
@@ -139,12 +169,12 @@ function calculateVector(point) {
         vector.x += E * (point.x - item.x);
         vector.y += E * (point.y - item.y);
     });
-    var localE=currentPoint.power/Math.pow(getRadius(currentPoint,point), 2);
-    var lenght = getRadius(new Point(0, 0, 0, ""), vector);    
-   
+    var localE = currentPoint.power / Math.pow(getRadius(currentPoint, point), 2);
+    var lenght = getRadius(new Point(0, 0, 0, ""), vector);
+
     if (lenght > 2 * margin || lenght < margin) {
         scale /= Math.abs(scale);
-        scale *= margin/lenght;
+        scale *= margin / lenght;
         //scale *= lenght/localE;
         vector.x *= scale;
         vector.y *= scale;
@@ -186,8 +216,9 @@ function calculatePointMoving() {
         points[i].y += vector.y;
         if (!insideScreen(points[i])) {
             //points.slice(i, 1);
-            points.splice(i,1);
-        }  
+            //points[i].delete();
+            points.splice(i, 1);
+        }
         fusion(item);
     });
 
@@ -196,10 +227,11 @@ function calculatePointMoving() {
 
 function fusion(point) {
     points.forEach(function (item, i, points) {
-        if (getRadius(point, item) < 15 && item!=point) {
-            var index = points.indexOf(item);
-            points[index].power += item;
-            points.splice(i,1);
+        if (getRadius(point, item) < 15 && item != point) {
+            var index = points.indexOf(point);
+            points[index].power += points[i].power;
+            //point[i].delete();
+            points.splice(i, 1);
         }
     })
 }
@@ -217,8 +249,7 @@ function mouseMove() {
         //isMoved.power*=2;
         canvas.onclick = null;
         var index = points.indexOf(isMoved);
-        if(index!=null)
-        {
+        if (index != null) {
             var mouse = window.event;
             points[index].x = mouse.clientX;
             points[index].y = mouse.clientY;
