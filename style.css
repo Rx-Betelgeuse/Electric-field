@@ -2,6 +2,19 @@
 
 html, body { width:100%; height:100%; } 
 
+p {
+    display: inline;
+}
+
+menu {
+     align-items: center;    
+}
+
+input {
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
 
 body {
     font-family: Helvetica sans-serif;
@@ -27,3 +40,41 @@ canvas {
     font-size: 13px;
     background-color: rgba(0, 0, 0, .5);
 }
+
+#container
+{
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+#field
+{
+  height: 100%;
+  width: 100%;
+  top: 0;
+    left: 0;
+}
+
+#controls
+{
+  position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 15px;
+    color: #eee;
+    font-size: 13px;
+    background-color: rgba(0, 0, 0, .5);
+}
+
+#click{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: #4B99AD;
+    padding: 8px 15px 8px 15px;
+    border: none;
+    color: #fff;
+}
+
+

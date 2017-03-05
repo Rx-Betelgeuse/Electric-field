@@ -4,6 +4,8 @@ var iterations;
 var scale = 1;
 var currentPoint;
 var maxPower = 10;
+var points = [];
+var speed = 0;
 
 
 
@@ -14,12 +16,10 @@ class Point {
         this.y = y;
         this.colors = color;
         this.power = power;
-        //this._color;
     }
 
     get color() {
-        //if (!this._color)
-            this._color = this.getColor();
+        this._color = this.getColor();
         return this._color;
     }
 
@@ -28,44 +28,25 @@ class Point {
         var green = 0;
         var blue = 0;
         if (this.power > 0) {
-            red = Math.round(this.power * 155 / maxPower)+100;
+            red = Math.round(this.power * 155 / maxPower) + 100;
         }
         else {
-            blue = Math.round(-this.power * 155 / maxPower)+100;
+            blue = Math.round(-this.power * 155 / maxPower) + 100;
         }
         return `rgb(${red}, ${green}, ${blue})`;
-        //return '#' + red.toString(16) + green.toString(16) + blue.toString(16);
     }
-     
-     /*
-    delete()
-    {
-        setInterval(function(){
-            this.power-=0.05*maxPower;            
-        },100)
-    };*/
+
 }
 
-var points = [];
+
 
 function drawPoint(point) {
-    //var context = canvas.getContext("2d");
     context.beginPath();
     context.arc(point.x, point.y, Math.abs(point.power), 0, 2 * Math.PI, false);
     context.fillStyle = point.color;
     context.strokeStyle = point.color;
     context.linewidth = 1;
     context.fill();
-    //context.stroke();
-}
-
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
 }
 
 function drawAllPoints() {
@@ -109,11 +90,9 @@ function drawPowerLines(point) {
 }
 
 function getRadius(a, b) {
-    var v1 = Math.pow((a.x - b.x), 2);
-    var v2 = Math.pow((a.y - b.y), 2);
-    var v3 = Math.pow(v1 + v2, 0.5);
-    return v3;
-    //return Math.pow((Math.pow((a.x-b.x),2)+Math.pow((a.y-b.y)),2), 0.5);
+        var v1 = Math.pow((a.x - b.x), 2);
+        var v2 = Math.pow((a.y - b.y), 2);
+        return  Math.pow(v1 + v2, 0.5);        
 }
 
 function drawLine(currentPoint) {
@@ -130,10 +109,7 @@ function drawLine(currentPoint) {
 }
 
 function insideScreen(point) {
-    if (point.x >= -100 && point.y >= -100 && point.y <= canvas.height + 100 && point.x <= canvas.width + 100)
-        return true;
-    else
-        return false;
+    return (point.x >= -100 && point.y >= -100 && point.y <= canvas.height + 100 && point.x <= canvas.width + 100)
 }
 
 function checkCollision(point, range) {
@@ -148,15 +124,11 @@ function calculateVectorInPoint(point) {
     points.forEach(function callback(item, i, points) {
         if (item != point) {
             var radius = getRadius(point, item);
-            var E = 100 * point.power * item.power / Math.pow(radius, 3);
+            var E = 100 * speed * point.power * item.power / Math.pow(radius, 3);
             vector.x += E * (point.x - item.x);
             vector.y += E * (point.y - item.y);
         }
     });
-    //var lenght = getRadius(new Point(0, 0, 0, ""), vector);
-    /* if ((lenght > 5 || lenght < 2)&&lenght!=0) {
-         vector = scaleVector(vector, lenght);
-     }*/
     return vector;
 }
 
@@ -175,7 +147,6 @@ function calculateVector(point) {
     if (lenght > 2 * margin || lenght < margin) {
         scale /= Math.abs(scale);
         scale *= margin / lenght;
-        //scale *= lenght/localE;
         vector.x *= scale;
         vector.y *= scale;
     }
@@ -184,9 +155,8 @@ function calculateVector(point) {
 
 
 function AddPoint() {
-    var point = new Point(event.clientX, event.clientY, Math.random() * 20 - 10, getRandomColor())
+    var point = new Point(event.clientX, event.clientY, document.getElementById("power").value/*Math.random() * 20 - 10, getRandomColor()*/)
     points.push(point);
-    console.log(point.power);
     drawAllPoints();
 }
 
@@ -203,7 +173,7 @@ function getNearestPoint(point, range) {
 }
 
 function OnLoad() {
-
+    alert("Click on screen to add point");
     setInterval(calculatePointMoving, 1000 / 30);
     drawAllPoints();
 }
@@ -215,8 +185,6 @@ function calculatePointMoving() {
         points[i].x += vector.x;
         points[i].y += vector.y;
         if (!insideScreen(points[i])) {
-            //points.slice(i, 1);
-            //points[i].delete();
             points.splice(i, 1);
         }
         fusion(item);
@@ -227,11 +195,14 @@ function calculatePointMoving() {
 
 function fusion(point) {
     points.forEach(function (item, i, points) {
-        if (getRadius(point, item) < 15 && item != point) {
+        if (getRadius(point, item) < 10 && item != point) {
             var index = points.indexOf(point);
-            points[index].power += points[i].power;
-            //point[i].delete();
+            points[index].power = Number(points[index].power) + Number(points[i].power);
+            var temp = points[index];
             points.splice(i, 1);
+            if (temp.power == 0) {
+                points.splice(points.indexOf(temp), 1);
+            }
         }
     })
 }
@@ -246,14 +217,12 @@ function mouseDown() {
 
 function mouseMove() {
     if (isMoved != null) {
-        //isMoved.power*=2;
         canvas.onclick = null;
         var index = points.indexOf(isMoved);
         if (index != null) {
             var mouse = window.event;
             points[index].x = mouse.clientX;
             points[index].y = mouse.clientY;
-            //drawAllPoints();
         }
     }
 }
@@ -262,30 +231,41 @@ function onMouseUp() {
 
     if (isMoved != null) {
         canvas.onmousemove = null;
-        /*
-        var index = points.indexOf(isMoved);
-        var mouse = window.event;
-        points[index].x = mouse.clientX;
-        points[index].y = mouse.clientY;
-        points[index].power /= 2;
-        drawAllPoints();
-        */
     }
     else {
         AddPoint();
     }
-    //canvas.onclick=AddPoint();    
-
 }
 
 
+function SetPower(val) {
+    var previous;
+    if (val == 0) {
+        if (previous > 0) {
+            val = Number(val) - 0.5;
+        }
+        else {
+            val = Number(val) + 0.5;
+        }
+        document.getElementById("power").value = val;
+    }
+    document.getElementById("currentPower").textContent = val;
+    function setPrevious(val) {
+        previous = val;
+    }
+}
+
+function SetSpeed(val) {
+    document.getElementById("speedCaption").textContent = val + 'x';
+    speed = val;
+}
+
+function Clear() {
+    points = [];
+}
 
 (function () {
-
-
     window.addEventListener('resize', resizeCanvas, false);
-    //canvas.addEventListener('onclick', AddPoint, false);
-
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -293,9 +273,7 @@ function onMouseUp() {
         drawStuff();
     }
     resizeCanvas();
-
     function drawStuff() {
-        // do your drawing stuff here
         drawAllPoints();
     }
 })();

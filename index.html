@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <style rel="stylesheet" type="text/css" href="style.css"></style>
+    <link rel="stylesheet" type="text/css" href="style.css"></link>
 </head>
+
 <body onload="OnLoad()">
-    <canvas id="field"  onmousedown="mouseDown()" onmouseup="onMouseUp()"></canvas>    
+    <div id="container">
+        <canvas id="field" onmousedown="mouseDown()" onmouseup="onMouseUp()">
+        </canvas>
+        <menu id="controls">
+            <p>Electric power</p>
+            <p id="currentPower">5</p>
+            <input id="power" type="range" min="-10" max="10" step="0.5" value="5" oninput="SetPower(this.value)">
+            <p>Speed</p>
+            <p id="speedCaption">1x</p>
+            <input id="speed" type="range" min="0" max="10" step="0.5" value="1" oninput="SetSpeed(this.value)">
+            <button id="click" onclick="Clear()">Clear</button>
+        </menu>
+    </div>
     <script src="app.js" type="text/javascript"></script>
 </body>
+
 </html>
